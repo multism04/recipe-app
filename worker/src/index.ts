@@ -237,7 +237,7 @@ export default {
               i.data.length > 0 &&
               i.data.length <= MAX_IMAGE_BASE64 &&
               typeof i.mime === 'string' &&
-              /^image\/(jpeg|png|webp)$/.test(i.mime),
+              /^image\/(jpeg|png|webp|heic|heif)$/.test(i.mime),
           )
           .slice(0, MAX_IMAGES) as { mime: string; data: string }[]
         if (images.length === 0) return fail(env, 400, '画像がありません')

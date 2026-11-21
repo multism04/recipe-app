@@ -99,23 +99,66 @@ export const ocr = (images: OcrImage[]) =>
 
 const MAX_SIDE = 2000
 
-export async function fileToOcrImage(file: File): Promise<OcrImage> {
+type Decoded = { source: CanvasImageSource; width: number; height: number; close: () => void }
+
+async function decode(file: File): Promise<Decoded> {
+  // createImageBitmap は形式の対応が広く、写真の向き(EXIF)も反映してくれる
+  if (typeof createImageBitmap === 'function') {
+    try {
+      const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' })
+      return { source: bmp, width: bmp.width, height: bmp.height, close: () => bmp.close() }
+    } catch {
+      // 次の方法を試す
+    }
+  }
   const url = URL.createObjectURL(file)
   try {
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
       const el = new Image()
       el.onload = () => resolve(el)
-      el.onerror = () => reject(new Error('画像を読み込めませんでした'))
+      el.onerror = () => reject(new Error('decode failed'))
       el.src = url
     })
-    const scale = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight))
+    return { source: img, width: img.naturalWidth, height: img.naturalHeight, close: () => {} }
+  } finally {
+    URL.revokeObjectURL(url)
+  }
+}
+
+// ブラウザで開けない形式でも、AIが読める形式なら元のまま送る
+const RAW_OK = /^image\/(jpeg|png|webp|heic|heif)$/
+const MAX_RAW_BYTES = 2_800_000
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '')
+    reader.onerror = () => reject(new Error('画像を読み込めませんでした'))
+    reader.readAsDataURL(file)
+  })
+}
+
+export async function fileToOcrImage(file: File): Promise<OcrImage> {
+  let d: Decoded
+  try {
+    d = await decode(file)
+  } catch {
+    if (RAW_OK.test(file.type) && file.size <= MAX_RAW_BYTES) {
+      return { mime: file.type, data: await fileToBase64(file) }
+    }
+    throw new Error(
+      `この画像は読み込めませんでした（形式: ${file.type || '不明'}）。スクリーンショットを撮り直すか、別の画像で試してください。`,
+    )
+  }
+  try {
+    const scale = Math.min(1, MAX_SIDE / Math.max(d.width, d.height))
     const canvas = document.createElement('canvas')
-    canvas.width = Math.round(img.naturalWidth * scale)
-    canvas.height = Math.round(img.naturalHeight * scale)
-    canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+    canvas.width = Math.max(1, Math.round(d.width * scale))
+    canvas.height = Math.max(1, Math.round(d.height * scale))
+    canvas.getContext('2d')!.drawImage(d.source, 0, 0, canvas.width, canvas.height)
     const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
     return { mime: 'image/jpeg', data: dataUrl.split(',')[1] }
   } finally {
-    URL.revokeObjectURL(url)
+    d.close()
   }
 }
