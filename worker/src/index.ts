@@ -144,14 +144,16 @@ async function ocrRecipe(env: Env, images: { mime: string; data: string }[]) {
 キー:
 - title: 料理名（文字列）。レシピが写っていない画像なら null
 - servings: 何人分か（例「2人分」。無ければ空文字）
-- ingredients: 材料の配列。各要素は {"name": 材料名, "amount": 分量}。分量が無ければ空文字
+- ingredients: 材料の配列。各要素は {"name": 材料名, "amount": 分量, "category": 分類}。分量が無ければ空文字
+  - category は次のどれか1つ: ${CATEGORIES.join('、')}、調味料
+  - 調味料 = 塩・砂糖・醤油・味噌・酢・油・酒・みりん・だし・スープの素・コンソメ・鶏がらスープの素・ブイヨン・ソース・ケチャップ・マヨネーズ・香辛料など
+  - 加工品は素材で分類（ベーコン・ハム・ソーセージ=肉、かまぼこ・ちくわ=魚介、チーズ・牛乳・バター=卵・乳製品、豆腐・納豆=豆・大豆製品）
 - steps: 作り方の手順の配列（番号は付けず、1手順を1要素に）
-- categories: 主な素材の分類。次から該当するものだけ複数選択: ${CATEGORIES.join('、')}
 - memo: コツ・ポイント・補足があれば文字列。無ければ空文字
 
 ルール:
 - 画像にある文字をできるだけそのまま書き起こす。推測で足さない
-- 調味料（塩・醤油など）だけでは categories に入れない。主役の素材を選ぶ
+- ingredients には画像の材料欄に書かれているものだけを入れる。手順の文章から材料を足さない
 - 出力はJSONオブジェクトのみ`
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${env.GEMINI_MODEL}:generateContent`
@@ -186,6 +188,21 @@ async function ocrRecipe(env: Env, images: { mime: string; data: string }[]) {
   }
   const recipe = cleanRecipe(parsed)
   if (!recipe) throw new Error('画像からレシピを読み取れませんでした')
+
+  // レシピ全体の素材分類は、材料ごとの分類から決める（調味料は除く）。
+  // AIに「主な素材」を直接選ばせると、材料にないものまで拾うことがあるため。
+  const rawIngredients = (parsed as { ingredients?: { category?: unknown }[] }).ingredients
+  const found = new Set<string>()
+  if (Array.isArray(rawIngredients)) {
+    for (const i of rawIngredients) {
+      if (typeof i?.category === 'string' && CATEGORIES.includes(i.category)) {
+        found.add(i.category)
+      }
+    }
+  }
+  // 「その他」は他に分類がないときだけ使う
+  if (found.size > 1) found.delete('その他')
+  recipe.categories = CATEGORIES.filter((c) => found.has(c))
   return recipe
 }
 
