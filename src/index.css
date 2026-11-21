@@ -1,0 +1,417 @@
+/* nendo風: 白いギャラリー、無彩色、字間1pxの小さなラベル */
+:root {
+  --bg: #ffffff;
+  --text: #212529;
+  --caption: #5a5a5a;
+  --charcoal: #5a5757;
+  --pill: #f2f2f7;
+  --line: rgba(0, 0, 0, 0.08);
+  --border: #ced4da;
+  --danger: #dc3545;
+  --font-ui: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-ja: -apple-system, YuGothic, 'Yu Gothic Medium', 'Yu Gothic', 'Hiragino Sans',
+    'Noto Sans JP', 'Noto Sans CJK JP', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ja);
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  line-break: strict;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 16px calc(64px + env(safe-area-inset-bottom));
+}
+
+/* ---------- ヘッダー ---------- */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: calc(8px + env(safe-area-inset-top)) 0 8px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.logo {
+  border: none;
+  background: none;
+  padding: 8px 0;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: var(--caption);
+}
+
+.nav {
+  display: flex;
+}
+
+.nav button,
+.label {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: var(--caption);
+}
+
+.nav button {
+  border: none;
+  background: none;
+  padding: 10px 12px;
+  min-height: 44px;
+}
+
+.nav button[aria-current='page'] {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+
+/* ---------- 共通パーツ ---------- */
+.screen {
+  padding-top: 24px;
+}
+
+.label {
+  display: block;
+  margin: 24px 0 8px;
+}
+
+.heading {
+  margin: 0 0 4px;
+  font-size: 24px;
+  line-height: 1.5;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.sub {
+  margin: 0;
+  font-size: 15px;
+  color: var(--charcoal);
+}
+
+.muted {
+  font-size: 13px;
+  color: var(--caption);
+}
+
+.error {
+  margin: 16px 0;
+  font-size: 14px;
+  color: var(--danger);
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 16px; /* iPhoneで入力時に拡大されないよう16px以上 */
+  line-height: 1.5;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--charcoal);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.btn {
+  display: inline-block;
+  min-height: 44px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 12px;
+  background: var(--pill);
+  color: var(--caption);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.btn.primary {
+  background: var(--charcoal);
+  color: #fff;
+}
+
+.btn.danger {
+  color: var(--danger);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  min-height: 36px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 12px;
+  background: var(--pill);
+  color: var(--caption);
+  font-size: 14px;
+}
+
+.pill[aria-pressed='true'] {
+  background: var(--charcoal);
+  color: #fff;
+}
+
+.pill.static {
+  min-height: 0;
+  padding: 0 10px;
+  font-size: 13px;
+  line-height: 24px;
+}
+
+/* ---------- 一覧 ---------- */
+.sort {
+  display: flex;
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.sort button {
+  border: none;
+  background: none;
+  padding: 8px 12px 8px 0;
+  min-height: 44px;
+  font-family: var(--font-ja);
+  font-size: 14px;
+  color: var(--caption);
+}
+
+.sort button[aria-pressed='true'] {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px 16px;
+  margin-top: 16px;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px 24px;
+  }
+}
+
+@media (min-width: 992px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.card {
+  display: block;
+  width: 100%;
+  padding: 16px 0 0;
+  border: none;
+  border-top: 1px solid var(--line);
+  background: none;
+  text-align: left;
+}
+
+.card .title {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 18px;
+  line-height: 1.5;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.card .ingredients {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 14px;
+  color: var(--charcoal);
+}
+
+.card .meta {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--caption);
+}
+
+.empty {
+  margin: 64px 0;
+  text-align: center;
+  color: var(--caption);
+}
+
+/* ---------- 詳細 ---------- */
+.detail {
+  max-width: 640px;
+}
+
+.detail h2 {
+  margin: 32px 0 8px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: var(--caption);
+}
+
+.ing-list,
+.step-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ing-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.ing-list .amount {
+  color: var(--caption);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.step-list li {
+  display: flex;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.step-list .num {
+  flex: none;
+  width: 20px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: var(--caption);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 40px;
+}
+
+/* ---------- 追加・編集 ---------- */
+.ing-row {
+  display: grid;
+  grid-template-columns: 1fr 96px 44px;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.icon-btn {
+  min-height: 44px;
+  border: none;
+  background: none;
+  font-size: 20px;
+  color: var(--caption);
+}
+
+.thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.thumbs img {
+  width: 72px;
+  height: 96px;
+  object-fit: cover;
+  background: var(--pill);
+}
+
+.filebox {
+  position: relative;
+}
+
+.filebox input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  cursor: pointer;
+}
+
+.code {
+  margin: 8px 0;
+  padding: 16px;
+  background: var(--pill);
+  border-radius: 12px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 15px;
+  letter-spacing: 1px;
+  word-break: break-all;
+  user-select: all;
+}
+
+.welcome {
+  max-width: 480px;
+  padding-top: 15vh;
+}

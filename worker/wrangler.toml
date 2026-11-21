@@ -1,0 +1,19 @@
+name = "recipe-app-worker"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "recipe-app-db"
+# `wrangler d1 create recipe-app-db` で発行された ID に置き換える
+database_id = "70e74638-152f-47e0-9754-4e70bc04e4c7"
+
+[vars]
+# このサイトからのリクエストだけを受け付ける
+ALLOWED_ORIGIN = "https://multism04.github.io"
+GEMINI_MODEL = "gemini-3.6-flash"
+
+# GEMINI_API_KEY は秘密情報なのでgitに入れず、別途登録する:
+#   wrangler secret put GEMINI_API_KEY
+# ローカル開発では worker/.dev.vars に書く（gitignore済み）。
